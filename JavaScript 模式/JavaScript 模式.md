@@ -1,0 +1,481 @@
+##对象创建模式##
+
+###命名空间模式###
+
+JavaScript 中没有内置命名空间，但可以创建一个全局对象，将所有功能添加到该全局对象中。
+    
+    var MU = {};
+    MU.utils = {};
+    MU.utils.event = {};
+    MU.utils.dom = {};
+
+通用的命名空间函数：在创建命名空间或属性之前，检查它是否已经存在，
+
+    var MU = MU || {};//避免覆盖
+    MU.namespace = function (nsString) {
+        var parts = nsString.split('.'),
+            parent = MU;
+
+        if(parts[0] === 'MU'){
+            parts = parts.splice(1);
+        }
+
+        for(var i = 0, len = parts.length; i < len; i++){
+            if(typeof parent[parts[i]] === undefiend){
+                parent[parts[i]] = {};
+            }
+            parent = parent[parts[i]];
+        }
+
+        return parent;
+
+    };
+
+    var event = MU.namespace(MU.utils.event);
+
+###私有模式###
+
+JavaScript 中所有对象的成员都是公共的。
+
+####构造函数及私有性####
+
+通过闭包方式，将私有变量定义在构造函数中，且作为返回对象的一个部分暴露给外部方法。
+    
+    function Person(arg){
+        var name = arg || 'muyao';//私有成员
+
+        this.getName = function(){
+            return name;
+        }
+
+        this.setName = function(newName){
+            name = newName;
+        }
+    }
+
+要注意的是，当在特权方法中直接返回一个私有变量，且该变量恰好是一个数组或对象，那么外面的代码是可以访问该私有变量的，这是因为它是通过**引用传递**的。可以通过返回一个新对象来解决该问题。
+
+####对象字面量及私有性####
+
+通过一个额外的匿名即时函数创建闭包来实现私有性。
+
+    var person = (function(){
+        var name = 'muyao';
+        
+        return{
+            getName: function(){
+                return name;
+            }
+            setName: function(arg){
+                name = arg;
+            }
+        }
+    }());
+
+
+####揭示模式####
+
+揭示模式用于将私有方法暴露成为公共方法。
+
+    var myArray = (function(){
+        
+        function isArray(arr){
+            return Object.prototype.toString.call(arr) === "[object Array]";
+        }
+
+        function indexOf(haystack, needle){
+            for(var i = haystack.length; i--; ){
+                if(haystack[i] === needle){
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        return{
+            isArray: isArray;
+            indexOf: indexOf;
+            inArray: indexOf;
+        }
+    }());
+
+
+###模块模式###
+
+模块模式是多种模式的组合：
+    
+- 命名空间
+- 即时函数
+- 声明依赖
+- 私有和特权成员
+- 揭示模式
+
+如下：
+
+    var MU = MU || {};
+    MU.namespace('MU.util.array');
+
+    MU.util.array = (function(){
+            //声明依赖
+        var event = MU.util.event,
+            obj = MU.util.object,
+        
+            //私有属性
+            arrStr = '[object Array]',
+            toString = Object.prototype.toString,
+
+            //私有方法
+            indexOf = functionf(haystack, needle){
+                for(var i = haystack.length; i--; ){
+                    if(haystack[i] === needle){
+                        return i;
+                    }
+                }
+                return -1;
+            }
+
+        //一次性初始化过程
+        ...
+        
+        //公共API
+        return{
+            
+            indexOf: indexOf,
+            isArray: function(a){
+                return toString.call(a) === arrStr;
+            }
+        }
+    }());
+
+
+###沙箱模式###
+
+在命名空间模式中，有一个全局对象；在沙箱模式中，有一个全局构造函数。
+
+沙箱模式解决了命名空间模式的如下几个缺点：
+
+1. 对单个全局变量的依赖变成了对应用程序的全局变量依赖。在命名空间模式中，是没有办法使同一个应用程序或库的两个版本运行在同一页面，因为这两者都需要同一个全局符号名。
+2. 对这种以点分割的名字来说，需要更长的字符，并且在运行时需要解析更长的时间
+
+沙箱模式提供了一个可用于模块运行的环境，且不会对其他模块和个人沙箱造成任何影响。
+
+    function Sandbox(){
+        var args = Array.prototype.slice.call(arguments),
+            //最后一个参数是回调函数
+            callback = args.pop(),
+            //模块可以作为一个数组或单独参数传递
+            modules = (args[0] && typeof args[0] === 'string') ? args : args[0];
+        
+        //确保该函数作为构造函数被调用
+        if(!(this instanceof Sandbox)){
+            return new Sandbox(modules, callback);
+        }
+
+        //需要向this添加的属性
+        this.a = 1;
+        this.b = 2;
+
+        //向this添加模块
+        //不指定模块名称或指定“*”都表示使用所有模块
+        if(!modules || modules === '*'){
+            modules = [];
+            for (var i in Sandbox.modules) {
+                if (Sandbox.modules.hasOwnProperty(i)) {
+                    modules.push(i);
+                }
+            }
+        }
+
+        for (var i = modules.length; i--; ){
+            Sandbox.modules[modules[i]](this);
+        }
+
+        callback(this);
+
+    }
+
+    //需要的原型属性
+    Sandbox.protutype = {
+        name: "MU",
+        version: "1.0",
+        getName: function(){
+            return this.name;
+        }
+    }
+
+    //添加模块，增加名为modules的属性
+    Sandbox.modules = {};
+    Sandbox.modules.dom = function (box) {
+        box.getElement = function(){}
+    };
+    Sandbox.modules.event = function (box) {
+        box.attachEvent = function () {};
+        box.detachEvent = function () {};
+    };
+
+    var mu = new Sandbox(['dom', 'event'], function(box){
+        
+    });
+
+###静态成员###
+
+静态属性和方法也就是那些从一个实例到另一个实例都不会发生改变的属性和方法。
+
+####公有静态方法####
+
+通过使用构造函数并且向其添加属性的这种方式实现。
+    
+    //构造函数
+    var Gadget = function(price){
+        this.price = price;
+    }
+
+    //静态方法
+    Gadget.isShiny = function(){
+        var msg = "you bet";
+        
+        //当以非静态方式，即实例方式调用时
+        if(this instanceof Gadget){
+            msg += ", it costs $" + this.price + "!";
+        }
+
+        return msg;
+    }
+    
+    //向原型添加一个普通方法
+    Gadget.prototype.isShiny = function(){
+        return Gadget.isShiny.call(this);
+    }
+
+
+####私有静态成员####
+
+私有静态成员是指以同一个构造函数创建的所有对象共享该成员，且构造函数外部不可访问该成员。
+
+    var Gadget = (function(){
+        //静态属性
+        var count = 0,
+            NewGadget;
+
+        //新构造函数实现
+        NewGadget = function (){
+            counter += 1;
+        }
+
+        NewGadget.prototype.getLastId = function(){
+            return counter;
+        }
+
+        return NewGadget;
+    }());
+
+
+###对象常量###
+
+一般采用命名约定方式，常量全部用**大写字母**表示。
+
+    var constant = (function(){
+        var constants = {};
+        hasOwn = Object.prototype.hasOwnProperty;
+        allowed = {
+            string: 1,
+            number: 1,
+            boolean: 1
+        }
+        prefix = (Math.random() + "_").slice(2);
+
+        return{
+            set: function(name, value){
+                if(this.isDefined(name)){
+                    return false;
+                }
+
+                if(!hasOwn.call(allowed, typeof value)){
+                    return false;
+                }
+
+                constants[prefix+name] = value;
+                return true;
+            },
+
+            get: function(name){
+                if(this.isDefined(name)){
+                    return constants[prefix+name];
+                }
+                return null;
+            },
+
+            isDefined: function(name){
+                return hasOwn.call(constants, prefix+name);
+            }
+        }
+    }());
+
+###链模式###
+
+链模式就是一个接一个的调用方法。当创建的方法返回的是无实际意义的值时，可以是它们返回this, 即正在使用的对象的实例。
+
+
+##代码复用模式-继承##
+
+传统继承模式：假定在类的基础上开发的继承模式，称之为类式继承模式（classic inheritance）；
+
+现代继承模式：其他任何不需要以类的方式考虑的模式。
+
+###类式继承模式###
+
+实现类式继承的目标是通过构造函数Child()获取来自于另外一个构造函数Parent的属性和方法，从而创建对象。
+
+    function Parent(name){
+        this.name = name;
+    }
+
+    Parent.prototype.say = function(){
+        return this.name;
+    }
+
+    function Child(name){};
+
+    inherit(Child, Parent);
+
+
+####原型链####
+
+使用Parent()构造函数创建一个对象，并将该对象赋值给Child()的原型。
+
+    function inherit(Child, Parent){
+        Child.prototype = new Parent();
+    }
+
+主要缺点：
+    
+1. 会继承原型属性，尤其是原型属性是引用类型的时候，会导致属性共享。
+2. 不支持将参数传递到子构造函数，而子构造函数然后又将参数传递到父构造函数。
+    
+####借用构造函数####
+
+在子构造函数中调用父构造函数，这种方式只能继承在父构造函数中添加到this的属性，同时**并不能继承到那些已经添加到原型中的成员**。
+
+    function Child(){
+        Parent.apply(this, arguments);
+    }
+
+通过借用多个构造函数，可以实现简单的多重继承。
+
+####组合借用构造函数和原型链####
+
+    function Child(){
+        Parent.apply(this, arguments);
+    }
+
+    Child.prototype = new Parent();
+
+主要缺点：
+
+1. 父构造函数被调用了两次，导致效率低下。
+2. 自身的属性也被继承了两次。
+
+####共享原型####
+
+    function inherit(Child, Parent){
+        Child.prototype = Parent.prototype;
+    }
+
+本模式的经验法则在于： 可复用成员应该转移到原型中而不是放置在this中。因此，出于继承的目的，任何值得继承的东西都应该放置在原型中实现。
+
+主要缺点：
+    
+1. 由于所有对象实际上共享了同一个原型，如果在继承链下方的某处存在一个子对象或者孙子对象修改了原型，则会影响到所有的父对象和祖先对象。
+
+####代理构造函数####
+
+通过断开父对象与子对象的原型之间的直接链接关系，从而解决共享一个原型所带来的问题。
+
+    var inherit = (function(){
+        var F = function(){};
+        F.prototype = Parent.prototype;
+        Child.prototype = new F();
+        Child.super = Parent.prototype;
+        Child.prototype.constructor = Child;
+    }());
+
+
+###现代“无类”继承模式###
+
+####原型继承####
+
+   
+
+
+##设计模式##
+
+###单体模式（singleton）###
+
+单体模式的思想在于保证一个特定类仅有一个实例。这意味着当你第二次使用同一个类创建对象的时候，应该得到与第一次所创建的完全相同的对象。
+
+当使用对象字面量创建对象时，已经是一个单体了。
+
+当使用构造函数来创建对象时，这种思想在于使用同一个构造函数以new操作符来创建多个对象时，应该仅获得指向完全相同的对象的新指针。
+
+####在构造函数的静态属性中缓存该实例####
+
+    function Universe(){
+        //是否存在一个实例
+        if(typeof Universe.instance === 'object'){
+            return Universe.instance;
+        }
+
+        this.start_time = 0;
+        
+        //缓存
+        Universe.instance = this;
+    }
+
+唯一缺点在于其instance属性是公开的。
+
+####将实例包装在闭包中####
+
+    var universe = (function(){
+        var instance;
+
+        return function(){
+            if(instance){
+                return instance;
+            }
+            
+            instance = this;
+            
+            this.start_time = 0;
+        }
+    }());
+
+
+###工厂模式###
+
+设计工厂模式的目的是为了创建对象，它通常在类或者类的静态方法中实现，具有下面目标：
+
+1. 当创建相似对象时执行重复操作。
+2. 在编译时不知道具体类型的情况下，为工厂客户提供一种创建对象的接口。
+
+通过工厂方法创建的对象在设计上都继承了相同的父对象思想。
+
+###迭代器模式###
+
+    
+                                                                                                                                                                             
+
+
+
+
+
+    
+
+    
+
+        
+
+        
+
+
+    
+
