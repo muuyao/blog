@@ -3,12 +3,13 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Muyao
-subtitle:
+title: Muyao's Blog
+subtitle: However long the night, the dawn will break.
 description:
 author: Muyao
-language:
+language: en
 timezone:
+avatar: /images/avatar.jpg
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
@@ -63,7 +64,8 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+theme: next
+disqus_shortname: muyao
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
