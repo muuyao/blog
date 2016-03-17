@@ -12,14 +12,14 @@ install:
 - npm install hexo-deployer-git --save
 script:
 - hexo clean
-- hexo g
-- hexo d
+- hexo generate
+- hexo deploy
 before_install:
 - openssl aes-256-cbc -K $encrypted_685efb6bfe78_key -iv $encrypted_685efb6bfe78_iv
   -in ci_rsa.enc -out ~/.ssh/ci_rsa -d
-- chmod 600 ~/.ssh/id_rsa //修改目录权限
-- eval $(ssh-agent)//将密钥加入系统
+- chmod 600 ~/.ssh/ci_rsa
+- eval $(ssh-agent)
 - ssh-add ~/.ssh/ci_rsa
-- cp ssh_config ~/.ssh/config //修改 git 信息
+- cp ssh_config ~/.ssh/config
 - git config --global user.name "muuyao"
 - git config --global user.email wanngxiao@gmail.com
