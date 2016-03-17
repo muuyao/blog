@@ -69,5 +69,5 @@ theme: fexo
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: https://github.com/muuyao/blog.git
+  repo: git@github.com:muuyao/blog.git
   branch: gh-pages
