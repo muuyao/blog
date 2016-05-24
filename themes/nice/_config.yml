@@ -2,7 +2,7 @@
 menu:
   #Home: /
   archives: /archives
-  tags: /tags
+  tags: /tag
   about: /about
 rss: /atom.xml
 
