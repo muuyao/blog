@@ -4,8 +4,8 @@ article.main.single-post(class=page.layout + '-layout')
     .post-meta
         include post/meta.pug
         +postDate(page.date)
+        +postComments(page.path)
         +postTag(page.tags)
-        +postComments()
 
 
     .post-body

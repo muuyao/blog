@@ -7,6 +7,8 @@ mixin postTag(tags)
             each tag in tags.toArray()
                 a(href=url_for('tags/' + tag.name))= tag.name
 
-mixin postComments()
-     span.post-comments 评论&nbsp;
-        a(href=page.permalink + '#disqus_thread') 0
+mixin postComments(path)
+    if !is_page()
+        span.post-comments 评论&nbsp;
+            span(class="disqus-comment-count" data-disqus-identifier=path) 0
+
