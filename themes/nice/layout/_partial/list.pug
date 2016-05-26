@@ -3,7 +3,7 @@ section.archives-wrap.main
         each post, index in page.posts.toArray()
             article.post-item(data-type= index % 2 ? 'even' : 'odd')
                 a(class='post-thumbnail' href=url_for(post.path) title=post.title)
-                    img(src=post.thumbnail ? post.thumbnail : theme.default_thumbnail)
+                    img(src=post.thumbnail ? post.thumbnail : site.data.thumbnail[index % 8])
                 .post-brief
                     include post/meta.pug
                     +postDate(post.date)

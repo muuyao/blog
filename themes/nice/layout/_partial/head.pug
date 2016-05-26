@@ -10,7 +10,7 @@ block page_description
 
 title
     block site_title
-        = config.title
+        = config.title + '-' + config.subtitle
 
 // icon
 link(rel="shortcut icon" type='image/png' href=url_for('images/icon/favicon.png'))
