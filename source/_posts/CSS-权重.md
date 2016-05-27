@@ -1,6 +1,8 @@
 ---
 title: CSS 权重
 date: 2015-03-13 13:30:27
+categories:
+- FE
 tags: CSS
 ---
 
@@ -39,10 +41,10 @@ CSS权重决定了同一元素的不同样式规则的生效情况。
 
     * {color: red}
     h1#page-title {color: black}
-    
+
     <!-- em元素的颜色是red -->
     <h1 id="page-title">Meerkat <em>Central</em></h1>
- 
+
 
 ### 来源 ###
 

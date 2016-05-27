@@ -2,8 +2,9 @@
 menu:
   #Home: /
   archives: /archives
-  book: /read
-  #tags: /tag
+  categories: /category
+  #book: /read
+  tags: /tag
   #about: /about
 rss: /atom.xml
 

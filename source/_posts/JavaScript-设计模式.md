@@ -1,6 +1,8 @@
 ---
 title: JavaScript 设计模式
 date: 2015-03-08 13:30:17
+categories:
+- FE
 tags: JavaScript
 ---
 ### 单体模式（singleton）###
@@ -22,7 +24,7 @@ tags: JavaScript
         }
 
         this.start_time = 0;
-        
+
         //缓存
         Universe.instance = this;
     }
@@ -38,9 +40,9 @@ tags: JavaScript
             if(instance){
                 return instance;
             }
-            
+
             instance = this;
-            
+
             this.start_time = 0;
         }
     }());

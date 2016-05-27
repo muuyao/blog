@@ -1,7 +1,9 @@
 ---
 title: CSS 选择器
 date: 2015-03-08 13:29:38
-tags:
+categories:
+- FE
+tags: CSS
 ---
 
 ### 元素选择符 ###
