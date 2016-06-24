@@ -6,6 +6,10 @@
     "version": "3.2.0"
   },
   "dependencies": {
+    "gulp": "^3.9.1",
+    "gulp-clean-css": "^2.0.10",
+    "gulp-imagemin": "^3.0.1",
+    "gulp-uglify": "^1.5.4",
     "hexo": "^3.2.0",
     "hexo-browsersync": "^0.2.0",
     "hexo-generator-archive": "^0.1.4",
